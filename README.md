@@ -1,5 +1,5 @@
-# REPT
-##### React Express PostgreSQL Template
+# PartyMusic
+##### Сайт для голосования за песни на дискотеке
 
 Для запуска в dev режиме:
 ```shell
