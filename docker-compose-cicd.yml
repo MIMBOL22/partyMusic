@@ -1,0 +1,12 @@
+version: "3.3"
+services:
+    backend:
+        image: mimbol/party_music_back:latest
+        build:
+            context: ./back
+            dockerfile: /docker/Dockerfile
+    frontend:
+        image: mimbol/party_music_front:latest
+        build:
+            context: ./front
+            dockerfile: /docker/Dockerfile

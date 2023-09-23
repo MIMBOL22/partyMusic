@@ -1,0 +1,40 @@
+{
+    "name": "gravittest",
+    "version": "1.0.0",
+    "description": "Написать бекенд сервиса hastebin с следующим функционалом:\r  - /new POST, тело документа до 2Мб\r ###### Ответ:\r ```json\r {\r     \"id\": \"j1jlp40a\",\r     \"deleteToken\": \"&YHUWH8yqhd98hwd8y\"\r }\r ```\r Если достигнут лимит:\r ```json\r {\r   \"error\": \"Documents per hour limit reached\"\r }\r ```\r - /raw/ID GET, ID - номер документа полученный на предыдущем этапе",
+    "main": "index.js",
+    "scripts": {
+        "build": "npx tsc",
+        "dev": "npx tsc-watch --onSuccess \"node ./build/main.js\"",
+        "lint": "npx eslint \"src/**/*.{js,ts}\"",
+        "lint:fix": "npx eslint \"src/**/*.{js,ts}\" --fix",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@tsconfig/recommended": "^1.0.3",
+        "bcrypt": "^5.1.1",
+        "body-parser": "^1.20.2",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "pg": "^8.11.3",
+        "reflect-metadata": "^0.1.13",
+        "typeorm": "^0.3.17",
+        "typescript": "^5.2.2"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.0",
+        "@types/body-parser": "^1.19.3",
+        "@types/express": "^4.17.17",
+        "@types/node": "^20.6.3",
+        "@typescript-eslint/eslint-plugin": "^6.7.2",
+        "@typescript-eslint/parser": "^6.7.2",
+        "eslint": "^8.49.0",
+        "eslint-config-prettier": "^9.0.0",
+        "prettier": "^3.0.3",
+        "tsc-watch": "^6.0.4",
+        "tslib": "^2.6.2"
+    }
+}
