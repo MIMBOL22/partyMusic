@@ -1,17 +1,14 @@
-import React, {useState} from "react";
-import {toast, ToastContainer} from "react-toastify";
+import React from "react";
 
 import "react-toastify/dist/ReactToastify.css";
 import "../css/index.css";
+import {NavBar} from "../сomponents/NavBar";
 
 
-export default function IndexPage() {
+export const IndexPage = () => {
     return (
         <>
-            <div className="wrapper">
-                <h1>Hi</h1>
-            </div>
-            <ToastContainer limit={3}/>
+            <NavBar/>
         </>
     );
 }
