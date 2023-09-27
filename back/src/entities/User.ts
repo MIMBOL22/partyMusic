@@ -1,4 +1,5 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm"
+import {BaseEntity, Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn} from "typeorm"
+import { Song } from "./Song"
 
 @Entity()
 export class User extends BaseEntity {
@@ -8,7 +9,7 @@ export class User extends BaseEntity {
     @Column()
     firstName: string
 
-    @Column({type: "varchar", length: 2})
+    @Column({type: "varchar", length: 1})
     lastName: string
 
     @Column()
@@ -19,4 +20,13 @@ export class User extends BaseEntity {
 
     @Column()
     banned: boolean
+
+    @OneToMany(() => Song, (song) => song.adder)
+    songs: Song[]
+
+    @ManyToMany(() => Song, (song) => song.likes)
+    likes: Song[]
+
+    @ManyToMany(() => Song, (song) => song.dislikes)
+    dislikes: Song[]
 }
