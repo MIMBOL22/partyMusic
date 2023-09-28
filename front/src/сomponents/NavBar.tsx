@@ -14,7 +14,10 @@ export const NavBar = () => {
 
     const vkAuthDiv = useRef<HTMLDivElement>(null);
 
+    const [log, setLog] = useLocalStorage("log","");
+
     useEffect(() => {
+
         const oneTapButton = Connect.buttonOneTapAuth({
             callback: event => {
                 const {type} = event;
@@ -26,6 +29,7 @@ export const NavBar = () => {
                 switch (type) {
                     case ConnectEvents.OneTapAuthEventsSDK.LOGIN_SUCCESS:
                         console.log(event);
+                        setLog(JSON.stringify(event))
                         // @ts-ignore
                         if (event?.payload?.token !== undefined && event?.payload?.uuid !== undefined) {
                             fetch("/api/user/auth/vk", {
@@ -58,9 +62,9 @@ export const NavBar = () => {
                     case ConnectEvents.OneTapAuthEventsSDK.FULL_AUTH_NEEDED:
                     case ConnectEvents.OneTapAuthEventsSDK.PHONE_VALIDATION_NEEDED:
                     case ConnectEvents.ButtonOneTapAuthEventsSDK.SHOW_LOGIN:
-                        return Connect.redirectAuth({ url: 'https://bal.mimbol.ru' });
+                        return Connect.redirectAuth({ url: 'https://party.mimbol.ru' });
                     case ConnectEvents.ButtonOneTapAuthEventsSDK.SHOW_LOGIN_OPTIONS:
-                        return Connect.redirectAuth({ url: 'https://bal.mimbol.ru', screen: 'phone' });
+                        return Connect.redirectAuth({ url: 'https://party.mimbol.ru', screen: 'phone' });
                 }
 
                 return;
@@ -94,9 +98,9 @@ export const NavBar = () => {
     renderCounter.current++;
 
     console.log("U",jwt, isExpired, decodedToken)
-    if (jwt != "" && isExpired && decodedToken != null && renderCounter.current > 2) { // Маленький костыль
-        logout();
-    }
+    // if (jwt != "" && isExpired && decodedToken != null && renderCounter.current > 2) { // Маленький костыль
+    //     logout();
+    // }
 
     return (
         <Navbar className="bg-body-tertiary">
