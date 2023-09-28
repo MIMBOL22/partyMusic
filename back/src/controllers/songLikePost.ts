@@ -54,17 +54,18 @@ export const songLikePost = async (req: Request, res: Response) => {
             })
             if (song === null) return res.status(500).send({message: "Song not found"})
 
-            const songIndexLikes = user.likes.indexOf(song as Song);
-            const songIndexDislikes = user.dislikes.indexOf(song as Song);
+            const songIndexLikes = user.likes.findIndex(s => s.id === song.id);
+            const songIndexDislikes = user.dislikes.findIndex(s => s.id === song.id);
 
             if (songIndexDislikes !== -1) {
-                user.dislikes = user.dislikes.filter((a,k)=> k !== songIndexDislikes)
+                user.dislikes = user.dislikes.filter((a,k)=> a.id != song.id)
             }
 
             if (songIndexLikes === -1) {
                 user.likes.push(song);
             }
-            user.save();
+
+            await user.save();
             return res.send({"success": true});
         });
 

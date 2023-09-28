@@ -35,7 +35,7 @@ export const NewSong = () => {
 
         if (trackName.length > 32) return toast.warning("Название песни слишком длинное")
         if (trackAuthor.length > 32) return toast.warning("Автор песни слишком длинный")
-        if (trackURL.length > 32) return toast.warning("Ссылка на песню слишком длинная")
+        if (trackURL.length > 64) return toast.warning("Ссылка на песню слишком длинная")
 
         fetch("/api/song/add", {
             method: 'POST',

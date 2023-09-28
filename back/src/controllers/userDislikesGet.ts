@@ -32,8 +32,7 @@ export const userDislikesGet = async (req: Request, res: Response) => {
                 where: {
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
-                    vk_id: decoded.vk_id,
-                    banned: false
+                    vk_id: decoded.vk_id
                 },
                 relations: {
                     dislikes: true,

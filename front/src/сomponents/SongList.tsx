@@ -1,30 +1,32 @@
 import "./SongList.css"
-import useSWR, { useSWRConfig } from "swr"
+import useSWR, {useSWRConfig} from "swr"
 import useLocalStorage from "use-local-storage";
-import {Table} from "react-bootstrap";
-import {IAPISongList} from "../interfaces/IAPISongList"
 import {fetchWithToken} from "../fetcher";
 import {useJwt} from "react-jwt";
 import {IJWTUser} from "../interfaces/IJWTUser";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
+import {IAPISongList} from "../interfaces/IAPISongList";
+import { Table } from "react-bootstrap";
+import { IAPISongListId } from "../interfaces/IAPISongListId";
+import {likedListFetcher, musicListFetcher} from "../fetcher.js";
 
 export const SongList = () => {
-    const { mutate } = useSWRConfig()
+    const {mutate} = useSWRConfig()
     const [jwt, setJwt] = useLocalStorage('jwt', "");
-    const {decodedToken} = useJwt<IJWTUser>(jwt);
+    const {decodedToken, isExpired} = useJwt<IJWTUser>(jwt);
+    const isLogged = !isExpired && jwt !== "";
 
-    const {data: songList, error, isLoading} = useSWR<IAPISongList>(['/api/song/list', jwt], fetchWithToken);
-    if (error || songList?.success !== true) return <div>Ошибка загрузки списка песен</div>
-    if (isLoading) return <div>Загрузка песен...</div>
+    const songList = useSWR(['/api/song/list', jwt], musicListFetcher);
+    const likedList = useSWR(['/api/user/likes', jwt], likedListFetcher);
+    const dislikedList = useSWR(['/api/user/dislikes', jwt], likedListFetcher);
 
-    const {data: likedList, error: likedError, isLoading: likedIsLoading } = useSWR<IAPISongList>(['/api/user/likes', jwt], fetchWithToken);
-    if (likedIsLoading || likedList?.success !== true) return <div>Ошибка загрузки списка лайков</div>
-    if (likedIsLoading) return <div>Загрузка айков...</div>
+    if (songList.error || songList.data?.success !== true) return <div>Ошибка загрузки списка песен</div>
+    if (likedList.error || likedList.data?.success !== true && isLogged) return <div>Ошибка загрузки списка лайков</div>
+    if (dislikedList.isLoading || dislikedList.data?.success !== true &&  isLogged) return <div>Ошибка загрузки списка дизлайков</div>
 
-    const {data: dislikedList, error: dislikedError, isLoading: dislikedIsLoading } = useSWR<IAPISongList>(['/api/user/dislikes', jwt], fetchWithToken);
-    if (dislikedIsLoading || dislikedList?.success !== true) return <div>Ошибка загрузки списка дизлайков</div>
-    if (dislikedIsLoading) return <div>Загрузка дизлайков</div>
-
+    if (songList.isLoading) return <div>Загрузка песен...</div>
+    if (likedList.isLoading) return <div>Загрузка лайков...</div>
+    if (dislikedList.isLoading) return <div>Загрузка дизлайков</div>
 
 
     const userBan = (user_id: number | undefined) => {
@@ -34,21 +36,67 @@ export const SongList = () => {
             method: 'PUT',
             headers: {
                 "Content-Type": "application/json",
-                Authorization: "Bearer "+jwt
+                Authorization: "Bearer " + jwt
             },
             body: JSON.stringify({user_id})
         })
             .then(response => response.json())
             .then(result => {
-                if (result.success !== true){
-                    console.error("UserBan Error:",result);
+                if (result.success !== true) {
+                    console.error("UserBan songList.error:", result);
                     toast.error("Неизвестная ошибка");
-                }else{
+                } else {
                     toast.success("Пользователь заблокирован");
                     mutate(['/api/song/list', jwt]);
                 }
             })
-            .catch(error => console.log('error', error));
+            .catch(e => console.log('user/ban error', e))
+    }
+
+    const likeTrack = (song_id: number) =>{
+        fetch("/api/song/like", {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + jwt
+            },
+            body: JSON.stringify({song_id})
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success !== true) {
+                    console.error("Like song error:", result);
+                    toast.error("Неизвестная ошибка");
+                } else {
+                    toast.success("Успешно");
+                    mutate(['/api/user/likes', jwt]);
+                    mutate(['/api/user/dislikes', jwt]);
+                }
+            })
+            .catch(e => console.log('song/like error', e))
+    }
+
+    const dislikeTrack = (song_id: number) =>{
+        fetch("/api/song/dislike", {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + jwt
+            },
+            body: JSON.stringify({song_id})
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success !== true) {
+                    console.error("Dislike song error:", result);
+                    toast.error("Неизвестная ошибка");
+                } else {
+                    toast.success("Успешно");
+                    mutate(['/api/user/likes', jwt]);
+                    mutate(['/api/user/dislikes', jwt]);
+                }
+            })
+            .catch(e => console.log('song/dislike error', e))
     }
 
     return (<div className="song_list">
@@ -64,20 +112,51 @@ export const SongList = () => {
             </thead>
             <tbody>
             {
-                songList?.result.map((s, l) => {
+                songList.data?.result.map((s, l) => {
+                    const isLiked = likedList.data?.result.indexOf(s.id) !== -1;
+                    const isDisliked = dislikedList.data?.result.indexOf(s.id) !== -1;
+
+
+
                     return (<tr key={s.id}>
                         <td>{l + 1}</td>
                         <td>{s.author} - {s.name}</td>
-                        <td>{s.youtube ? s.youtube : "Отсутствует"}</td>
-                        <td>Отсутствуют</td>
+                        <td>
+                            {s.youtube && <a href={s.youtube}>{s.youtube}</a>}
+                            {!s.youtube && "Отсутствует"}
+                        </td>
+                        <td>
+                            <a
+                                href="#"
+                                style={{color: "#00ff7f", marginLeft: "1vw", background: isLiked ? "#1f6135" : ""}}
+                                onClick={() => {
+                                    likeTrack(s.id)
+                                }}
+                            >
+                                Лайк
+                            </a>
+
+
+                            <a
+                                href="#"
+                                style={{color: "red", marginLeft: "1vw", background: isDisliked ? "#c70000" : ""}}
+                                onClick={() => {
+                                    dislikeTrack(s.id)
+                                }}
+                            >
+                                Дизлайк
+                            </a>
+                        </td>
                         {(decodedToken?.group === 1 && s.adder !== undefined) && <th>
                             <a href={"https://vk.com/id" + s.adder?.vk_id} target="_blank">
                                 {s.adder.firstName} {s.adder.lastName}
                             </a>
                             <a
                                 href="#"
-                                style={{color:"red", marginLeft: "1vw"}}
-                                onClick={()=>{userBan(s?.adder?.id)}}
+                                style={{color: "red", marginLeft: "1vw"}}
+                                onClick={() => {
+                                    userBan(s?.adder?.id)
+                                }}
                             >
                                 БАН
                             </a>

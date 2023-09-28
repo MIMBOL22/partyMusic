@@ -17,7 +17,7 @@ export const songAddPost = async (req: Request, res: Response) => {
         if (req.body.track_author.length > 32) return res.status(400).send({message: "track_author is so long (>32)"});
 
         if (req.body.track_url !== undefined)
-            if (req.body.track_url.length > 32) return res.status(400).send({message: "track_url is so long (>32)"});
+            if (req.body.track_url.length > 64) return res.status(400).send({message: "track_url is so long (>64)"});
 
         const authorization = req.headers?.authorization?.split(" ") || [];
         if (authorization.length < 2) return res.status(401).send({message: "JWT Token is not defined in headers"});
