@@ -37,11 +37,16 @@ export const userLikesGet = async (req: Request, res: Response) => {
                 },
                 relations: {
                     likes: true,
+                },
+                select:{
+                    likes: {
+                        id: true
+                    }
                 }
             })
             if (user === null) return res.status(500).send({message: "User not found"})
 
-            return res.send({"success": true, result: user.likes});
+            return res.send({"success": true, result: user.likes.map(m=>m.id)});
         });
 
     } catch (e) {
