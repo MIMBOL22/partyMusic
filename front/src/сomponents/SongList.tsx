@@ -54,6 +54,7 @@ export const SongList = () => {
     }
 
     const likeTrack = (song_id: number) =>{
+        if (!isLogged) return toast.info("Для этого нужно войти")
         fetch("/api/song/like", {
             method: 'POST',
             headers: {
@@ -77,6 +78,7 @@ export const SongList = () => {
     }
 
     const dislikeTrack = (song_id: number) =>{
+        if (!isLogged) return toast.info("Для этого нужно войти")
         fetch("/api/song/dislike", {
             method: 'POST',
             headers: {
@@ -113,9 +115,11 @@ export const SongList = () => {
             <tbody>
             {
                 songList.data?.result.map((s, l) => {
-                    const isLiked = likedList.data?.result.indexOf(s.id) !== -1;
-                    const isDisliked = dislikedList.data?.result.indexOf(s.id) !== -1;
+                    const likedIndex = likedList.data?.result?.indexOf(s.id);
+                    const dislikedIndex = dislikedList.data?.result?.indexOf(s.id);
 
+                    const isLiked = likedIndex === undefined ? false : likedIndex !== -1;
+                    const isDisliked = dislikedIndex === undefined ? false :dislikedIndex !== -1;
 
 
                     return (<tr key={s.id}>
