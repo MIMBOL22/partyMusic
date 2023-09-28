@@ -9,13 +9,11 @@ import useLocalStorage from "use-local-storage";
 
 
 export const IndexPage = () => {
-    const [log, setLog] = useLocalStorage("log","");
     return (
         <>
             <NavBar/>
             <NewSong/>
             <SongList/>
-            {log}
         </>
     );
 }

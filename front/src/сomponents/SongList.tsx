@@ -108,6 +108,7 @@ export const SongList = () => {
                 <th>Место</th>
                 <th>Трек</th>
                 <th>YouTube</th>
+                <th>Рейтинг</th>
                 <th>Действия</th>
                 {decodedToken?.group === 1 && <th>Добавил</th>}
             </tr>
@@ -122,19 +123,21 @@ export const SongList = () => {
                     const isDisliked = dislikedIndex === undefined ? false :dislikedIndex !== -1;
 
 
-                    return (<tr key={s.id}>
+                    return (<tr key={s.id} id={"track"+s.id}>
                         <td>{l + 1}</td>
                         <td>{s.author} - {s.name}</td>
                         <td>
-                            {s.youtube && <a href={s.youtube}>{s.youtube}</a>}
+                            {s.youtube && <a href={s.youtube} target="_blank">{s.youtube}</a>}
                             {!s.youtube && "Отсутствует"}
                         </td>
+                        <td>+{s.likes} / -{s.dislikes}</td>
                         <td>
                             <a
                                 href="#"
                                 style={{color: "#00ff7f", marginLeft: "1vw", background: isLiked ? "#1f6135" : ""}}
-                                onClick={() => {
-                                    likeTrack(s.id)
+                                onClick={(e) => {
+                                    likeTrack(s.id);
+                                    e.preventDefault();
                                 }}
                             >
                                 Лайк
@@ -144,8 +147,9 @@ export const SongList = () => {
                             <a
                                 href="#"
                                 style={{color: "red", marginLeft: "1vw", background: isDisliked ? "#c70000" : ""}}
-                                onClick={() => {
-                                    dislikeTrack(s.id)
+                                onClick={(e) => {
+                                    dislikeTrack(s.id);
+                                    e.preventDefault();
                                 }}
                             >
                                 Дизлайк
