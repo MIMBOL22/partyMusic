@@ -10,7 +10,7 @@ export class Song
     @Column()
     author: string
 
-    @Column({type: "varchar", length: 1})
+    @Column({type: "varchar"})
     name: string
 
     @Column({nullable: true})

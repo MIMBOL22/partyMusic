@@ -50,5 +50,9 @@
     "exclude": [
         "node_modules",
         "build"
-    ]
+    ],
+    "watchOptions": {
+        "watchFile": "DynamicPriorityPolling",
+        "watchDirectory": "useFsEvents",
+    },
 }

@@ -23,6 +23,7 @@ services:
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             POSTGRES_PORT: ${POSTGRES_PORT}
+            VK_SERVICE_TOKEN: ${VK_SERVICE_TOKEN}
         depends_on:
             - "postgres"
     frontend:

@@ -1,0 +1,6 @@
+div.new_song{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 2vh 2vw;
+}

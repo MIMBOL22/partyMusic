@@ -9,7 +9,7 @@ export class User extends BaseEntity {
     @Column()
     firstName: string
 
-    @Column({type: "varchar", length: 1})
+    @Column({type: "varchar", length: 2})
     lastName: string
 
     @Column()
@@ -18,8 +18,11 @@ export class User extends BaseEntity {
     @Column()
     vk_id: number
 
-    @Column()
+    @Column({default: false})
     banned: boolean
+
+    @Column({default: 0})
+    group: number
 
     @OneToMany(() => Song, (song) => song.adder)
     songs: Song[]
