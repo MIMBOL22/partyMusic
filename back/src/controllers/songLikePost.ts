@@ -64,7 +64,7 @@ export const songLikePost = async (req: Request, res: Response) => {
             if (songIndexLikes === -1) {
                 user.likes.push(song);
             }
-
+            user.save();
             return res.send({"success": true});
         });
 

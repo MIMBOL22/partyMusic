@@ -58,12 +58,13 @@ export const songDislikePost = async (req: Request, res: Response) => {
             const songIndexDislikes = user.dislikes.indexOf(song as Song);
 
             if (songIndexLikes !== -1) {
-                user.likes = user.dislikes.filter((a,k)=> k !== songIndexLikes)
+                user.likes = user.likes.filter((a,k)=> k !== songIndexLikes)
             }
 
             if (songIndexDislikes === -1) {
                 user.dislikes.push(song);
             }
+            user.save();
 
             return res.send({"success": true});
         });
