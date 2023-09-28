@@ -5,6 +5,10 @@ import {User} from "../entities/User";
 import jwt from "jsonwebtoken";
 
 export const songListGet = async (req: Request, res: Response) => {
+    if (process.env.JWT_SECRET === undefined) {
+        console.error("ERROR: JWT_SECRET is empty");
+        return res.status(500).send({message: "Server internal error. See console."});
+    }
     try {
         const authorization = req.headers?.authorization?.split(" ") || [];
         let isAdmin = false;
@@ -14,6 +18,7 @@ export const songListGet = async (req: Request, res: Response) => {
             try{
                 const decoded = jwt.verify(authorization[1], process.env.JWT_SECRET);
                 user = await AppDataSource.getRepository(User).findOneBy({
+                    // @ts-ignore
                     vk_id: decoded.vk_id,
                     banned: false,
                     group: 1

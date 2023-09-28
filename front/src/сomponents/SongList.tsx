@@ -1,13 +1,15 @@
 import "./SongList.css"
-import useSWR from "swr"
+import useSWR, { useSWRConfig } from "swr"
 import useLocalStorage from "use-local-storage";
 import {Table} from "react-bootstrap";
 import {IAPISongList} from "../interfaces/IAPISongList"
 import {fetchWithToken} from "../fetcher";
-import { useJwt } from "react-jwt";
-import { IJWTUser } from "../interfaces/IJWTUser";
+import {useJwt} from "react-jwt";
+import {IJWTUser} from "../interfaces/IJWTUser";
+import { toast } from "react-toastify";
 
 export const SongList = () => {
+    const { mutate } = useSWRConfig()
     const [jwt, setJwt] = useLocalStorage('jwt', "");
     const {decodedToken} = useJwt<IJWTUser>(jwt);
 
@@ -18,6 +20,30 @@ export const SongList = () => {
     //
     // const { data, error, isLoading } = useSWR<IAPISongList>(['/api/user', jwt], fetchWithToken);
 
+
+    const userBan = (user_id: number | undefined) => {
+        if (user_id == undefined) return;
+
+        fetch("/api/user/ban", {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer "+jwt
+            },
+            body: JSON.stringify({user_id})
+        })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success !== true){
+                    console.error("UserBan Error:",result);
+                    toast.error("Неизвестная ошибка");
+                }else{
+                    toast.success("Пользователь заблокирован");
+                    mutate(['/api/song/list', jwt]);
+                }
+            })
+            .catch(error => console.log('error', error));
+    }
 
     return (<div className="song_list">
         <Table striped bordered hover>
@@ -39,14 +65,20 @@ export const SongList = () => {
                         <td>{s.youtube ? s.youtube : "Отсутствует"}</td>
                         <td>Отсутствуют</td>
                         {(decodedToken?.group === 1 && s.adder !== undefined) && <th>
-                                    <a href={"https://vk.com/id"+s.adder?.vk_id} target="_blank">
-                                        {s.adder.firstName} {s.adder.lastName}
-                                    </a>
-                                </th>}
+                            <a href={"https://vk.com/id" + s.adder?.vk_id} target="_blank">
+                                {s.adder.firstName} {s.adder.lastName}
+                            </a>
+                            <a
+                                href="#"
+                                style={{color:"red", marginLeft: "1vw"}}
+                                onClick={()=>{userBan(s?.adder?.id)}}
+                            >
+                                БАН
+                            </a>
+                        </th>}
                     </tr>)
                 })
             }
-
             </tbody>
         </Table>
     </div>)

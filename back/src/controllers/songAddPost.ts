@@ -5,6 +5,10 @@ import jwt from "jsonwebtoken";
 import { Song } from "../entities/Song";
 
 export const songAddPost = async (req: Request, res: Response) => {
+    if (process.env.JWT_SECRET === undefined) {
+        console.error("ERROR: JWT_SECRET is empty");
+        return res.status(500).send({message: "Server internal error. See console."});
+    }
     try {
         if (req.body.track_name == undefined) return res.status(400).send({message: "track_name is not defined"});
         if (req.body.track_name.length > 32) return res.status(400).send({message: "track_name is so long (>32)"});
@@ -29,9 +33,12 @@ export const songAddPost = async (req: Request, res: Response) => {
                 return;
             }
 
+
+            // @ts-ignore
             if (decoded.vk_id == undefined) return res.status(401).send({message: "vk_id in JWT is null"});
 
             const user = await AppDataSource.getRepository(User).findOneBy({
+                // @ts-ignore
                 vk_id: decoded.vk_id,
                 banned: false
             })
