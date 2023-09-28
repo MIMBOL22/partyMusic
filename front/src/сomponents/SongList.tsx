@@ -17,8 +17,14 @@ export const SongList = () => {
     if (error || songList?.success !== true) return <div>Ошибка загрузки списка песен</div>
     if (isLoading) return <div>Загрузка песен...</div>
 
-    //
-    // const { data, error, isLoading } = useSWR<IAPISongList>(['/api/user', jwt], fetchWithToken);
+    const {data: likedList, error: likedError, isLoading: likedIsLoading } = useSWR<IAPISongList>(['/api/user/likes', jwt], fetchWithToken);
+    if (likedIsLoading || likedList?.success !== true) return <div>Ошибка загрузки списка лайков</div>
+    if (likedIsLoading) return <div>Загрузка айков...</div>
+
+    const {data: dislikedList, error: dislikedError, isLoading: dislikedIsLoading } = useSWR<IAPISongList>(['/api/user/dislikes', jwt], fetchWithToken);
+    if (dislikedIsLoading || dislikedList?.success !== true) return <div>Ошибка загрузки списка дизлайков</div>
+    if (dislikedIsLoading) return <div>Загрузка дизлайков</div>
+
 
 
     const userBan = (user_id: number | undefined) => {
