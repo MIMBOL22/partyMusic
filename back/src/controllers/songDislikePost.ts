@@ -2,7 +2,7 @@ import {User} from "../entities/User"
 import {AppDataSource} from "../data-source"
 import {Request, Response} from 'express';
 import jwt from "jsonwebtoken";
-import {Song} from "@server/entities/Song";
+import {Song} from "../entities/Song";
 
 export const songDislikePost = async (req: Request, res: Response) => {
     if (process.env.JWT_SECRET === undefined) {
@@ -64,7 +64,7 @@ export const songDislikePost = async (req: Request, res: Response) => {
             if (songIndexDislikes === -1) {
                 user.dislikes.push(song);
             }
-            
+
             return res.send({"success": true});
         });
 
