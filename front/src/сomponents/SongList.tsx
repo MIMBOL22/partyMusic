@@ -8,9 +8,10 @@ import {toast} from "react-toastify";
 import {IAPISongList} from "../interfaces/IAPISongList";
 import {Alert, Table} from "react-bootstrap";
 import { IAPISongListId } from "../interfaces/IAPISongListId";
-import {likedListFetcher, musicListFetcher} from "../fetcher.js";
+import {likedListFetcher, musicListFetcher} from "../fetcher";
 import React from "react";
 import {AuthorsWarning} from "./AuthorsWarning";
+import {UNIX_EXPIRED} from "./NewSong";
 
 export const SongList = () => {
     const {mutate} = useSWRConfig()
@@ -30,6 +31,8 @@ export const SongList = () => {
     if (likedList.isLoading) return <div>Загрузка лайков...</div>
     if (dislikedList.isLoading) return <div>Загрузка дизлайков</div>
 
+
+    const isTimeExpired = UNIX_EXPIRED  <= Date.now();
 
     const userBan = (user_id: number | undefined) => {
         if (user_id == undefined) return;
@@ -57,6 +60,8 @@ export const SongList = () => {
 
     const likeTrack = (song_id: number) =>{
         if (!isLogged) return toast.info("Для этого нужно войти")
+        if (isTimeExpired) return toast.info("Время истекло")
+
         fetch("/api/song/like", {
             method: 'POST',
             headers: {
@@ -81,6 +86,7 @@ export const SongList = () => {
 
     const dislikeTrack = (song_id: number) =>{
         if (!isLogged) return toast.info("Для этого нужно войти")
+        if (isTimeExpired) return toast.info("Время истекло")
         fetch("/api/song/dislike", {
             method: 'POST',
             headers: {

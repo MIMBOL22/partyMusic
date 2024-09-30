@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Button, Form, InputGroup, Modal} from "react-bootstrap";
+import {Alert, Badge, Button, Form, InputGroup, Modal} from "react-bootstrap";
 import { useJwt } from "react-jwt";
 import { toast } from "react-toastify";
 import useLocalStorage from "use-local-storage";
@@ -10,6 +10,9 @@ import {AuthorsWarning} from "./AuthorsWarning";
 import {IAPIBannedAuthor} from "../interfaces/IAPIBannedAuthor";
 import {fetchWithToken} from "../fetcher";
 import {IAPIUserSongs} from "../interfaces/IAPIUserSongs";
+import {TimerBadge} from "./TimerBadge";
+
+export const UNIX_EXPIRED = 1728154740000;
 
 export const NewSong = () => {
 
@@ -89,17 +92,22 @@ export const NewSong = () => {
 
     const isAllowedToAddSong = userSongsCount.data?.result !== undefined && (userSongsCount.data?.result > 9) && decodedToken?.group !== undefined && decodedToken.group < 1
 
+    const isTimeExpired = UNIX_EXPIRED  <= Date.now();
+
     return (
         <div className="new_song">
             <Button variant="primary" onClick={addSong} disabled={isAllowedToAddSong}>
                 Добавить песню {!userSongsCount.error && !userSongsCount.isLoading && userSongsCount.data?.result !== undefined && <>({userSongsCount.data?.result} из 10)</>}
             </Button>
-
+            <TimerBadge unitEnd={UNIX_EXPIRED}/>
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>Добавление песни {!userSongsCount.error && !userSongsCount.isLoading && userSongsCount.data?.result && <>({userSongsCount.data?.result} из 10)</>}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+                    {isTimeExpired && <Alert variant="danger">
+                        Время голосования истекло!
+                    </Alert>}
                     <Form>
                         <Form.Group className="mb-3" controlId="formTrackName">
                             <Form.Label>Название песни</Form.Label>
@@ -107,10 +115,11 @@ export const NewSong = () => {
                                 type="text"
                                 placeholder="Пожалуйста, пишите оригинальное название."
                                 value={trackName}
+                                disabled={isTimeExpired}
                                 onChange={(e)=>setTrackName((e.target as HTMLInputElement).value)}
                             />
                             <Form.Text className="text-muted">
-                                Пести с неверными названиями по типу "звук поставим на всю" могут быть удалены
+                                Песни с неверными названиями по типу "звук поставим на всю" могут быть удалены
                             </Form.Text>
                         </Form.Group>
 
@@ -123,6 +132,7 @@ export const NewSong = () => {
                                     value={trackAuthor}
                                     isInvalid={isAuthorBanned}
                                     onChange={(e)=>setTrackAuthor((e.target as HTMLInputElement).value)}
+                                    disabled={isTimeExpired}
                                 />
                                 <Form.Control.Feedback type="invalid">
                                     Запрещено добавлять иноагентов
@@ -138,6 +148,7 @@ export const NewSong = () => {
                                 placeholder="https://music.yandex.ru/album/14582248/track/79932386?utm_source=desktop&utm_medium=copy_link"
                                 value={trackURL}
                                 onChange={(e)=>setTrackURL((e.target as HTMLInputElement).value)}
+                                disabled={isTimeExpired}
                             />
                         </Form.Group>
                     </Form>
@@ -146,7 +157,7 @@ export const NewSong = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Отмена
                     </Button>
-                    <Button variant="primary" disabled={isAuthorBanned} onClick={pushSong}>
+                    <Button variant="primary" disabled={isAuthorBanned || isTimeExpired} onClick={pushSong}>
                         Добавить
                     </Button>
                 </Modal.Footer>
