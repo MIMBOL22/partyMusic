@@ -3,23 +3,13 @@ import { AppDataSource } from "../data-source"
 import {Request, Response} from 'express';
 import jwt from "jsonwebtoken";
 import { Song } from "../entities/Song";
-import {BannedAuthors} from "../entities/BannedAuthors";
 
-export const songAddPost = async (req: Request, res: Response) => {
+export const userSongs = async (req: Request, res: Response) => {
     if (process.env.JWT_SECRET === undefined) {
         console.error("ERROR: JWT_SECRET is empty");
         return res.status(500).send({message: "Server internal error. See console."});
     }
     try {
-        if (req.body.track_name == undefined) return res.status(400).send({message: "track_name is not defined"});
-        if (req.body.track_name.length > 32) return res.status(400).send({message: "track_name is so long (>32)"});
-
-        if (req.body.track_author == undefined) return res.status(400).send({message: "track_author is not defined"});
-        if (req.body.track_author.length > 32) return res.status(400).send({message: "track_author is so long (>32)"});
-
-        if (req.body.track_url !== undefined)
-            if (req.body.track_url.length > 64) return res.status(400).send({message: "track_url is so long (>64)"});
-
         const authorization = req.headers?.authorization?.split(" ") || [];
         if (authorization.length < 2) return res.status(401).send({message: "JWT Token is not defined in headers"});
         if (authorization[0] !== "Bearer") return res.status(400).send({message: "JWT Token is not Bearer token"});
@@ -33,7 +23,6 @@ export const songAddPost = async (req: Request, res: Response) => {
                 }
                 return;
             }
-
 
             // @ts-ignore
             if (decoded.vk_id == undefined) return res.status(401).send({message: "vk_id in JWT is null"});
@@ -50,27 +39,8 @@ export const songAddPost = async (req: Request, res: Response) => {
                     id: user.id
                 }
             })
-            if (songList?.length > 9 && user.group == 0) return res.status(403).send({message: "Too many songs"})
 
-
-            const bannedAuthors = await AppDataSource.getRepository(BannedAuthors).find();
-            const splitedAuthorName = req.body.track_author.toLowerCase().split(" ");
-            const isAuthorBanned = bannedAuthors
-                .map(a=>  splitedAuthorName.map(an => a.author_names.includes(an))) // Сорри, сложная логика
-                .map(a => a.includes(true))
-                .includes(true)
-
-            if(isAuthorBanned && user.group == 0) return res.status(451).send({message: "Author is banned"})
-
-            const song = new Song();
-            song.author = req.body.track_author;
-            song.name = req.body.track_name;
-            song.youtube = req.body.track_url;
-            song.adder = user;
-            song.likes = [user];
-            song.save();
-
-            return res.send({"success":true});
+            return res.send({"success":true, result: songList?.length || 0});
         });
 
     } catch (e) {

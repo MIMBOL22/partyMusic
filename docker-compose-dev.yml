@@ -34,9 +34,10 @@ services:
         environment:
             BURL: "http://backend:${BACKEND_PORT}"
         ports:
-            - "5173:5173"
+            - "80:80"
         volumes:
             - ./front/src:/app/src
+            - ./front/vite.config.ts:/app/vite.config.ts
         build:
             context: ./front
             dockerfile: ./docker/dev.Dockerfile

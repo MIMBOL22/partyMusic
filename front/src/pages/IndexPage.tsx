@@ -6,6 +6,7 @@ import {NavBar} from "../сomponents/NavBar";
 import { NewSong } from "../сomponents/NewSong";
 import { SongList } from "../сomponents/SongList";
 import useLocalStorage from "use-local-storage";
+import {AuthorsWarning} from "../сomponents/AuthorsWarning";
 
 
 export const IndexPage = () => {

@@ -1,13 +1,18 @@
 import React, {useState} from "react";
-import {Button, Form, Modal} from "react-bootstrap";
+import {Button, Form, InputGroup, Modal} from "react-bootstrap";
 import { useJwt } from "react-jwt";
 import { toast } from "react-toastify";
 import useLocalStorage from "use-local-storage";
 import { IJWTUser } from "../interfaces/IJWTUser";
 import "./NewSong.css"
-import { useSWRConfig } from "swr";
+import useSWR, { useSWRConfig } from "swr";
+import {AuthorsWarning} from "./AuthorsWarning";
+import {IAPIBannedAuthor} from "../interfaces/IAPIBannedAuthor";
+import {fetchWithToken} from "../fetcher";
+import {IAPIUserSongs} from "../interfaces/IAPIUserSongs";
 
 export const NewSong = () => {
+
     const [jwt, setJwt] = useLocalStorage('jwt', "");
     const {decodedToken, isExpired} = useJwt<IJWTUser>(jwt);
     const isLogged = !isExpired && jwt !== "";
@@ -18,6 +23,10 @@ export const NewSong = () => {
     const [trackAuthor, setTrackAuthor] = useState("");
     const [trackURL, setTrackURL] = useState("");
 
+    // @ts-ignore
+    const {data: bannedAuthors, error, isLoading} = useSWR<IAPIBannedAuthor>(["/api/authors/banned", jwt], fetchWithToken);
+    // @ts-ignore
+    const userSongsCount = useSWR<IAPIUserSongs>(["/api/user/songs", jwt], fetchWithToken);
 
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -27,6 +36,15 @@ export const NewSong = () => {
         if (!isLogged) return toast.info("Для этого нужно войти");
         if (decodedToken?.banned) return toast.error("Вы заблокированы");
         handleShow();
+    }
+
+    let isAuthorBanned = false;
+    if(!error && !isLoading && bannedAuthors && bannedAuthors?.result && bannedAuthors?.result?.length > 0){
+        const splitedAuthorName = trackAuthor.toLowerCase().split(" ");
+        isAuthorBanned = bannedAuthors.result
+            .map(a=>  splitedAuthorName.map(an => a.author_names.includes(an))) // Сорри, сложная логика
+            .map(a => a.includes(true))
+            .includes(true) && decodedToken?.group !== undefined && decodedToken.group < 1
     }
 
     const pushSong = () => {
@@ -60,28 +78,33 @@ export const NewSong = () => {
                     setTrackURL("");
                     setTrackName("");
                     mutate(['/api/song/list', jwt]);
+                    mutate(['/api/user/likes', jwt]);
+                    mutate(['/api/user/dislikes', jwt]);
+                    userSongsCount.mutate();
                     handleClose();
                 }
             })
             .catch(error => console.log('error', error));
     }
 
+    const isAllowedToAddSong = userSongsCount.data?.result !== undefined && (userSongsCount.data?.result > 9) && decodedToken?.group !== undefined && decodedToken.group < 1
+
     return (
         <div className="new_song">
-            <Button variant="primary" onClick={addSong}>
-                Добавить песню
+            <Button variant="primary" onClick={addSong} disabled={isAllowedToAddSong}>
+                Добавить песню {!userSongsCount.error && !userSongsCount.isLoading && userSongsCount.data?.result !== undefined && <>({userSongsCount.data?.result} из 10)</>}
             </Button>
 
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Добавление песни</Modal.Title>
+                    <Modal.Title>Добавление песни {!userSongsCount.error && !userSongsCount.isLoading && userSongsCount.data?.result && <>({userSongsCount.data?.result} из 10)</>}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3" controlId="formTrackName">
                             <Form.Label>Название песни</Form.Label>
                             <Form.Control
-                                type="email"
+                                type="text"
                                 placeholder="Пожалуйста, пишите оригинальное название."
                                 value={trackName}
                                 onChange={(e)=>setTrackName((e.target as HTMLInputElement).value)}
@@ -93,20 +116,26 @@ export const NewSong = () => {
 
                         <Form.Group className="mb-3" controlId="formTrackAuthor">
                             <Form.Label>Автор песни</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Введите автора"
-                                value={trackAuthor}
-                                onChange={(e)=>setTrackAuthor((e.target as HTMLInputElement).value)}
-                            />
+                            <InputGroup hasValidation>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Введите автора"
+                                    value={trackAuthor}
+                                    isInvalid={isAuthorBanned}
+                                    onChange={(e)=>setTrackAuthor((e.target as HTMLInputElement).value)}
+                                />
+                                <Form.Control.Feedback type="invalid">
+                                    Запрещено добавлять иноагентов
+                                </Form.Control.Feedback>
+                            </InputGroup>
                         </Form.Group>
 
 
                         <Form.Group className="mb-3" controlId="formTrackUrl">
-                            <Form.Label>Ссылка на песню в YouTube (не обязательно)</Form.Label>
+                            <Form.Label>Ссылка на песню в ЯМузыка (не обязательно)</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                placeholder="https://music.yandex.ru/album/14582248/track/79932386?utm_source=desktop&utm_medium=copy_link"
                                 value={trackURL}
                                 onChange={(e)=>setTrackURL((e.target as HTMLInputElement).value)}
                             />
@@ -117,7 +146,7 @@ export const NewSong = () => {
                     <Button variant="secondary" onClick={handleClose}>
                         Отмена
                     </Button>
-                    <Button variant="primary" onClick={pushSong}>
+                    <Button variant="primary" disabled={isAuthorBanned} onClick={pushSong}>
                         Добавить
                     </Button>
                 </Modal.Footer>

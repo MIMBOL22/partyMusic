@@ -6,9 +6,11 @@ import {useJwt} from "react-jwt";
 import {IJWTUser} from "../interfaces/IJWTUser";
 import {toast} from "react-toastify";
 import {IAPISongList} from "../interfaces/IAPISongList";
-import { Table } from "react-bootstrap";
+import {Alert, Table} from "react-bootstrap";
 import { IAPISongListId } from "../interfaces/IAPISongListId";
 import {likedListFetcher, musicListFetcher} from "../fetcher.js";
+import React from "react";
+import {AuthorsWarning} from "./AuthorsWarning";
 
 export const SongList = () => {
     const {mutate} = useSWRConfig()
@@ -102,12 +104,14 @@ export const SongList = () => {
     }
 
     return (<div className="song_list">
-        <Table striped bordered hover>
+        <AuthorsWarning/>
+
+        <Table responsive>
             <thead>
             <tr>
                 <th>Место</th>
                 <th>Трек</th>
-                <th>YouTube</th>
+                <th>ЯМузыка</th>
                 <th>Рейтинг</th>
                 <th>Действия</th>
                 {decodedToken?.group === 1 && <th>Добавил</th>}

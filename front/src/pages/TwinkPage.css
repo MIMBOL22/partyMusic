@@ -1,0 +1,20 @@
+video.tt {
+    height: 100%;
+    width: 100%;
+
+    object-fit: cover;
+}
+div.tvideo_container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    z-index: 9;
+}
+button.tw {
+    z-index: 10;
+}
+video.tt::-webkit-media-controls-enclosure {
+    display:none !important;
+}

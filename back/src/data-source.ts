@@ -1,6 +1,7 @@
 import {DataSource} from "typeorm";
 import { Song } from "./entities/Song";
 import { User } from "./entities/User";
+import {BannedAuthors} from "./entities/BannedAuthors";
 
 export const AppDataSource = new DataSource({
     type: "postgres",
@@ -11,7 +12,7 @@ export const AppDataSource = new DataSource({
     database: process.env.POSTGRES_DB,
     synchronize: true,
     logging: true,
-    entities: [Song, User],
+    entities: [Song, User, BannedAuthors],
     subscribers: [],
     migrations: [],
 })

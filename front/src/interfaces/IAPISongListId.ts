@@ -1,4 +1,4 @@
 export interface IAPISongListId {
     success: boolean,
-    result: Number[];
+    result: number[];
 }

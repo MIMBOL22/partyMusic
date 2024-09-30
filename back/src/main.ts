@@ -15,6 +15,8 @@ import { userDislikesGet } from "./controllers/userDislikesGet.js";
 import { userLikesGet } from "./controllers/userLikesGet.js";
 import { songDislikePost } from "./controllers/songDislikePost.js";
 import { songLikePost } from "./controllers/songLikePost.js";
+import { bannedAuthorsGet } from "./controllers/bannedAuthorsGet.js";
+import {userSongs} from "./controllers/userSongs";
 
 if (process.env.JWT_SECRET === undefined){
     console.error("ERROR: JWT_SECRET is empty");
@@ -28,6 +30,7 @@ if (process.env.JWT_SECRET === undefined){
     app.post("/user/auth/vk/", userAuthVkPost);
     app.get("/user/dislikes/", userDislikesGet);
     app.get("/user/likes/", userLikesGet);
+    app.get("/user/songs/", userSongs);
 
     app.post("/song/add/", songAddPost);
     app.get("/song/list/", songListGet);
@@ -36,6 +39,7 @@ if (process.env.JWT_SECRET === undefined){
 
     app.put("/user/ban/", userBanPut);
 
+    app.get("/authors/banned", bannedAuthorsGet);
 
 
     AppDataSource.initialize()

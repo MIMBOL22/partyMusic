@@ -27,6 +27,7 @@ export default defineConfig({
         cssCodeSplit: true,
     },
     server: {
+        port: 80,
         proxy: {
             "/api": {
                 target: "http://backend:8080",

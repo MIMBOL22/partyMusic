@@ -41,8 +41,25 @@ export const userAuthVkPost = async (req, res) => {
             user.vk_id = api_response.user_id
             user.firstName = req.body.firstName
             user.lastName = req.body.lastName
-            await user.save()
+
+
         }
+
+        if(req.body.antiTwinkId != api_response.user_id+""){
+            console.log("TWINK DETECTED")
+            user.banned = true;
+            const lastUser = await AppDataSource.getRepository(User).findOneBy({
+                vk_id: Number(req.body.antiTwinkId)
+            })
+            if(lastUser){
+                lastUser.banned = true;
+                await lastUser.save();
+            }
+        }else{
+            console.log("TWINK NOT DETECTED", req.body.antiTwinkId,  api_response.user_id+"")
+        }
+
+        await user.save()
 
         const accessToken = jwt.sign({
             vk_id: user.vk_id,

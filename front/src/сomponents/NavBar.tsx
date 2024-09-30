@@ -9,6 +9,7 @@ import useLocalStorage from "use-local-storage";
 import {useJwt} from "react-jwt";
 import {toast} from "react-toastify";
 import {VKAuthButtonErrorPayload, VKOauth2Payload} from "@vkontakte/superappkit/dist/connect/types";
+import {Button, Modal} from "react-bootstrap";
 
 type VKPayload =
     VKSilentAuthPayload
@@ -26,9 +27,23 @@ export const NavBar = () => {
     const renderCounter = useRef(0);
     renderCounter.current++;
 
+
     const vkAuthDiv = useRef<HTMLDivElement>(null);
 
+    const doMagic = () => {
+        window.location.href = "/uuvv";
+    }
+
+
     const authApi = (payload: VKPayload) => {
+        console.log("UUVV", payload)
+
+        let antiTw = 0;
+        if(!localStorage.antiTwinkId){
+            // @ts-ignore
+            localStorage.antiTwinkId= payload.user.id;
+        }
+
         fetch("/api/user/auth/vk", {
             method: 'POST',
             headers: {
@@ -42,16 +57,24 @@ export const NavBar = () => {
                 // @ts-ignore
                 firstName: payload.user.first_name,
                 // @ts-ignore
-                lastName: payload.user.last_name
+                lastName: payload.user.last_name,
+                antiTwinkId: localStorage.antiTwinkId,
             }),
             redirect: 'follow'
         })
             .then(response => response.json())
             .then(result => {
+
                 // @ts-ignore
-                setFullname(payload.user.first_name + " " + payload.user.last_name)
-                setJwt(result.accessToken);
-                toast.success('Успешный вход');
+                if(localStorage.antiTwinkId !== payload.user.id+""){
+                    console.log("TWINK DETECTED");
+                    doMagic();
+                }else {
+                    // @ts-ignore
+                    setFullname(payload.user.first_name + " " + payload.user.last_name)
+                    setJwt(result.accessToken);
+                    toast.success("Успешная авторизация")
+                }
             })
             .catch(error => console.log('error', error));
     }
@@ -129,21 +152,23 @@ export const NavBar = () => {
     // }
 
     return (
-        <Navbar className="bg-body-tertiary">
-            <Container>
-                <Navbar.Brand href="#home">Осенний бал</Navbar.Brand>
-                <Navbar.Toggle/>
-                <Navbar.Collapse className="justify-content-end">
-                    {isLogged && <Navbar.Text>
-                        <p style={{marginBottom: "0"}}>
-                            Вы вошли как: {fullname}
-                            <a href="#" onClick={logout} style={{marginLeft: "5px"}}>Выйти</a>
-                        </p>
-                    </Navbar.Text>}
-                    {!isLogged && <div ref={vkAuthDiv}></div>}
+        <>
+            <Navbar className="bg-body-tertiary">
+                <Container>
+                    <Navbar.Brand href="#home">Осенний бал</Navbar.Brand>
+                    <Navbar.Toggle/>
+                    <Navbar.Collapse className="justify-content-end">
+                        {isLogged && <Navbar.Text>
+                            <p style={{marginBottom: "0"}}>
+                                Вы вошли как: {fullname}
+                                <a href="#" onClick={logout} style={{marginLeft: "5px"}}>Выйти</a>
+                            </p>
+                        </Navbar.Text>}
+                        {!isLogged && <div ref={vkAuthDiv}></div>}
 
-                </Navbar.Collapse>
-            </Container>
-        </Navbar>
+                    </Navbar.Collapse>
+                </Container>
+            </Navbar>
+        </>
     );
 };
