@@ -2,6 +2,7 @@ FROM node:18-alpine as builder
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY src  ./src
+COPY public  ./public
 COPY index.html tsconfig.json tsconfig.node.json vite.config.ts .eslintrc.json ./
 RUN npx vite build
 
