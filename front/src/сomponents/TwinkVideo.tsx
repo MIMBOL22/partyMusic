@@ -18,7 +18,7 @@ export const TwinkVideo = ({magic}: {magic: boolean}) => {
 
     return (
         <div className="tvideo_container" hidden={!magic}>
-            <video className="tt" src="src/media/video.mp4" loop ref={videoRef}></video>
+            <video className="tt" src="public/video.mp4" loop ref={videoRef}></video>
         </div>
     )
 }
