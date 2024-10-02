@@ -18,10 +18,10 @@ export const TimerBadge = (props: PropsWithChildren<TimerBadgeProps>) => {
         }
     }, []);
 
-    const days = Math.ceil((props.unitEnd - unixTime) / 86400000)
-    const hours = Math.ceil((props.unitEnd - unixTime)  % 86400000 / 3600000)
-    const minutes = Math.ceil((props.unitEnd - unixTime) % 3600000 / 60000)
-    const seconds = Math.ceil((props.unitEnd - unixTime) % 60000 / 1000)
+    const days = Math.floor((props.unitEnd - unixTime) / 86400000)
+    const hours = Math.floor((props.unitEnd - unixTime)  % 86400000 / 3600000)
+    const minutes = Math.floor((props.unitEnd - unixTime) % 3600000 / 60000)
+    const seconds = Math.floor((props.unitEnd - unixTime) % 60000 / 1000)
     const isExpired = props.unitEnd <= unixTime;
 
 
